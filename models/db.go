@@ -1,14 +1,12 @@
-package mysql
+package models
 
 import (
 	"fmt"
+	"github.com/BurntSushi/toml"
+	"github.com/jinzhu/gorm"
 	"log"
 	"net/url"
 	"os"
-
-	"github.com/BurntSushi/toml"
-	"github.com/jinzhu/gorm"
-	_ "github.com/jinzhu/gorm/dialects/mysql"
 )
 
 type Config struct {
