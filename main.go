@@ -3,10 +3,14 @@ package main
 import (
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
+	"loggerProject/models"
 	"loggerProject/rouline"
 	"net/http"
 	"time"
 )
+
+
+
 
 func main()  {
 	//initDB()
@@ -18,6 +22,7 @@ func main()  {
 	g := e.Group("/v1")
 	rouline.RegisterRoutes(g)
 
+	models.InitClient()
 	/**
 	自定义启动方式
 	 */

@@ -21,6 +21,11 @@ func (user User) ReadError(ctx echo.Context)  error{
 	phone := ctx.QueryParam("phone")
 	use := models.User{}
 	fmt.Println("phone", phone)
+	//err := models.Redisdb.Set("phone", "100", 0).Err()
+	//if err != nil {
+	//	fmt.Printf("set score failed, err:%v\n", err)
+	//	return nil
+	//}
 	userInfo := use.FindOneByOps(phone)
 	return ctx.JSON(http.StatusOK, userInfo)
 }
