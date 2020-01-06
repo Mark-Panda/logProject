@@ -15,13 +15,11 @@ type Config struct {
 
 func GetDB() *gorm.DB {
 	dataSource := dataSource()
-	db, err := gorm.Open("mysql", dataSource)
+	db, err := gorm.Open("mysql", dataSource) //root:@(127.0.0.1)/blog?charset=utf8&parseTime=True&loc=Local
 	if err != nil {
 		panic(err)
 	}
-	if err != nil {
-		fmt.Println(err.Error())
-	}
+	db.SingularTable(true) //表生成结尾不带s
 	return db
 }
 
@@ -38,6 +36,8 @@ func dataSource() string {
 }
 
 func getProductDataSource(user, host, databasePath string) string {
+	fmt.Println("commmmmm")
+
 	var dataSourceParams = [...]string{
 		user,
 		"@tcp(",
@@ -45,12 +45,13 @@ func getProductDataSource(user, host, databasePath string) string {
 		":3306",
 		")",
 		databasePath,
-		"?parseTime=true",
+		//"?parseTime=true",
 	}
 	var dataSource string
 	for _, dataSourceParam := range dataSourceParams {
 		dataSource += dataSourceParam
 	}
+	fmt.Println("dataSource---", dataSource)
 	return dataSource
 }
 
