@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/BurntSushi/toml"
 	"github.com/jinzhu/gorm"
+	_ "github.com/jinzhu/gorm/dialects/mysql"
 	"log"
 	"net/url"
 	"os"
@@ -15,7 +16,7 @@ type Config struct {
 
 func GetDB() *gorm.DB {
 	dataSource := dataSource()
-	db, err := gorm.Open("mysql", dataSource) //root:@(127.0.0.1)/blog?charset=utf8&parseTime=True&loc=Local
+	db, err := gorm.Open("mysql", dataSource)
 	if err != nil {
 		panic(err)
 	}
@@ -62,4 +63,12 @@ func defaultDataSource() string {
 		panic(err)
 	}
 	return config.DataSource
+}
+
+/*
+同步表结构 gorm可以支持自动迁移，也就是自动的表结构迁移，只会创建表，补充缺少的列，缺少的索引。但并不会更改已经存在的列类型，也不会删除不再用的列，这样设计的目的是为了保护已存在的数据。可以同时针对多个表进行迁移设置。
+ */
+func InitTables()  {
+	GetDB().AutoMigrate(&User{}, &Login{}, &Mechanism{})
+
 }

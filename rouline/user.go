@@ -33,7 +33,8 @@ func (user User) ReadError(ctx echo.Context)  error{
 func (user User) WriteError(ctx echo.Context) error {
 	phone := ctx.QueryParam("phone")
 	name := ctx.QueryParam("name")
+	pwd := ctx.QueryParam("pwd")
 	use := models.User{}
-	userInfo := use.CreateUser(phone, name)
+	userInfo := use.CreateUser(phone, name, pwd)
 	return ctx.JSON(http.StatusOK, userInfo)
 }

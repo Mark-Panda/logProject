@@ -10,6 +10,7 @@ type User struct {
 	//ID   string `gorm:"type:int(11);not null;"`// 名为`ID`的字段会默认作为表的主键
 	Name string `gorm:"type:varchar(20);not null;"`
 	Phone string `gorm:"type:varchar(20);not null;"`
+	Password string `gorm:"type:varchar(20);not null;"`
 }
 
 func (use *User) FindOneByOps(phone string) *User {
@@ -23,11 +24,12 @@ func (use *User) FindOneByOps(phone string) *User {
 	return &user
 }
 
-func (use *User) CreateUser(phone, name string) bool {
+func (use *User) CreateUser(phone, name, pwd string) bool {
 	fmt.Println("参数1111", phone, name)
 	user := User{
 		Name:name,
 		Phone:phone,
+		Password:pwd,
 	}
 	if err := GetDB().Create(&user).Error; err != nil {
 		fmt.Println("createError:", err)

@@ -22,7 +22,8 @@ func main()  {
 	g := e.Group("/v1")
 	rouline.RegisterRoutes(g)
 
-	models.InitClient()
+	models.InitClient()  //启动Redis
+	models.InitTables() //同步表结构
 	/**
 	自定义启动方式
 	 */
