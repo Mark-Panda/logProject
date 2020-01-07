@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/labstack/echo"
+	"github.com/labstack/echo/middleware"
 	"loggerProject/models"
 	"net/http"
 	"time"
@@ -15,12 +16,13 @@ func (user User) UserRegisterRoute(group *echo.Group) {
 	group.GET("/use", user.ReadError)
 	group.GET("/add", user.WriteError)
 	group.POST("/getToken", user.GetJwtToken)
+	group.Use(middleware.JWT([]byte("secret")))  //在验证token是需要在路由前设置和jwt一样的密钥
 	group.GET("/login", user.Login)
 }
 
 func (user User) Login(ctx echo.Context) error  {
 	fmt.Println("come come")
-	//fmt.Println("ccccc", ctx.Get("user").(*jwt.Token) )
+	fmt.Println("ccccc", ctx.Get("user") )
 	tokenInfo := ctx.Get("user").(*jwt.Token)
 	claims := tokenInfo.Claims.(jwt.MapClaims)
 	name := claims["name"].(string)
@@ -59,20 +61,20 @@ func (user User) GetJwtToken(ctx echo.Context) error  {
 	sign := use.CheckUserInfo(name, pwd)
 	if sign {
 		token := jwt.New(jwt.SigningMethodHS256)
-		//nameKey := name + "secrty"
-		//fmt.Println("hhhh", nameKey)
+		nameKey := name + "secrty"
 		// Set claims
 		claims := token.Claims.(jwt.MapClaims)
-		claims["name"] = "Jon Snow"
+		claims["name"] = nameKey
 		claims["admin"] = true
 		//claims["exp"] = time.Now().Add(time.Minute * 3).Unix()
-		claims["exp"] = time.Now().Add(time.Hour * 72).Unix()
+		claims["exp"] = time.Now().Add(time.Hour * 72).Unix()  //超时时间
 
 		// Generate encoded token and send it as response.
-		t, err := token.SignedString([]byte("secret"))
+		t, err := token.SignedString([]byte("secret"))  //密钥
 		if err != nil {
 			return err
 		}
+		ctx.Set("user", t)
 		return ctx.JSON(http.StatusOK, map[string]string{
 			"token": t,
 		})
