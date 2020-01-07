@@ -24,6 +24,23 @@ func (use *User) FindOneByOps(phone string) *User {
 	return &user
 }
 
+func (use *User) CheckUserInfo(name, pwd string) bool  {
+	fmt.Println("验证参数", name, pwd)
+	user := User{}
+
+	if err := GetDB().Where("name = ?", name).Find(&user).Error; err != nil {
+		fmt.Println("查询失败", err)
+		return false
+	}
+	fmt.Println("患者信息", user)
+	if user.Password == pwd {
+		return true
+	}else {
+		return false
+	}
+
+}
+
 func (use *User) CreateUser(phone, name, pwd string) bool {
 	fmt.Println("参数1111", phone, name)
 	user := User{
