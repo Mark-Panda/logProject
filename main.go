@@ -35,8 +35,3 @@ func main()  {
 	e.Logger.Fatal(e.StartServer(s))
 
 }
-
-//func initDB()  {
-//	db := models.GetDB()
-//	db.AutoMigrate(models.Login{})
-//}
