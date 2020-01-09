@@ -8,7 +8,6 @@ import (
 
 type User struct {
 	gorm.Model
-	//ID   string `gorm:"type:int(11);not null;"`// 名为`ID`的字段会默认作为表的主键
 	Name string `gorm:"type:varchar(20);not null;" validate:"required||string=5,30"`
 	Phone string `gorm:"type:varchar(20);not null;" validate:"required||string=11"`
 	Password string `gorm:"type:varchar(20);not null;" validate:"required||string=8,20"`
@@ -50,9 +49,7 @@ func (use *User) CreateUser(phone, name, pwd string) bool {
 		Password:pwd,
 	}
 	validator := govalidators.New()
-
 	errList := validator.Validate(user)
-	fmt.Println("sssss", errList)
 	if errList != nil {
 		for _, err := range errList {
 			fmt.Println("参数验证err:", err)
@@ -66,7 +63,3 @@ func (use *User) CreateUser(phone, name, pwd string) bool {
 	return true
 }
 
-
-
-// 禁用默认表名的复数形式，如果置为 true，则 `User` 的默认表名是 `user`
-//db.SingularTable(true)

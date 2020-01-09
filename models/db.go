@@ -37,7 +37,6 @@ func dataSource() string {
 }
 
 func getProductDataSource(user, host, databasePath string) string {
-	fmt.Println("commmmmm")
 
 	var dataSourceParams = [...]string{
 		user,

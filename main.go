@@ -29,6 +29,7 @@ func main()  {
 	e.Use(middleware.Recover())
 	e.Use(middleware.CORS())
 	//e.Use(middleware.CSRF())
+
 	g := e.Group("/v1")
 	rouline.RegisterRoutes(g)
 
