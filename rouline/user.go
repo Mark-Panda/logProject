@@ -54,6 +54,11 @@ func (user User) WriteError(ctx echo.Context) error {
 }
 
 func (user User) GetJwtToken(ctx echo.Context) error  {
+	fmt.Println("上下文", ctx)
+
+
+
+
 	name := ctx.FormValue("name")
 	pwd := ctx.FormValue("pwd")
 	fmt.Println("入参", name, pwd)
