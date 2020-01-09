@@ -3,14 +3,15 @@ package models
 import (
 	"fmt"
 	"github.com/jinzhu/gorm"
+	"github.com/smokezl/govalidators" //参数检验器
 )
 
 type User struct {
 	gorm.Model
 	//ID   string `gorm:"type:int(11);not null;"`// 名为`ID`的字段会默认作为表的主键
-	Name string `gorm:"type:varchar(20);not null;"`
-	Phone string `gorm:"type:varchar(20);not null;"`
-	Password string `gorm:"type:varchar(20);not null;"`
+	Name string `gorm:"type:varchar(20);not null;" validate:"required||string=5,30"`
+	Phone string `gorm:"type:varchar(20);not null;" validate:"required||string=11"`
+	Password string `gorm:"type:varchar(20);not null;" validate:"required||string=8,20"`
 }
 
 func (use *User) FindOneByOps(phone string) *User {
@@ -43,12 +44,22 @@ func (use *User) CheckUserInfo(name, pwd string) bool  {
 
 func (use *User) CreateUser(phone, name, pwd string) bool {
 	fmt.Println("参数1111", phone, name)
-	user := User{
+	user := &User{
 		Name:name,
 		Phone:phone,
 		Password:pwd,
 	}
-	if err := GetDB().Create(&user).Error; err != nil {
+	validator := govalidators.New()
+
+	errList := validator.Validate(user)
+	fmt.Println("sssss", errList)
+	if errList != nil {
+		for _, err := range errList {
+			fmt.Println("参数验证err:", err)
+			return false
+		}
+	}
+	if err := GetDB().Create(user).Error; err != nil {
 		fmt.Println("createError:", err)
 		return false
 	}
