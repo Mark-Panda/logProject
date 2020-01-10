@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/labstack/echo"
+	"github.com/labstack/echo/middleware"
 	"loggerProject/models"
 	"net/http"
 	"time"
@@ -14,11 +15,15 @@ type User struct {}
 func (user User) UserRegisterRoute(group *echo.Group) {
 	group.GET("/user/use", user.ReadError)
 	group.GET("/user/add", user.WriteError)
-	group.POST("/user/getToken", user.GetJwtToken)
 	group.POST("/user/produce", user.Produce)
 
-	//group.Use(middleware.JWT([]byte("secret")))  //在验证token是需要在路由前设置和jwt一样的密钥
-	group.GET("/user/login", user.Login)
+	/*
+	用于登录
+	 */
+	group.POST("/getToken", user.GetJwtToken)
+	s := group.Group("/loginToWeb")
+	s.Use(middleware.JWT([]byte("secret")))  //在验证token是需要在路由前设置和jwt一样的密钥
+	s.GET("/login", user.Login)
 
 }
 

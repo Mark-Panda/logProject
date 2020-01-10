@@ -19,40 +19,48 @@ type RequestType struct {
 	Table string       //业务表
 }
 
+type ResponsInfo struct {
+	Code int64 `json:"code"`
+	Msg string `json:"msg"`
+}
 
 func RegisterRoutes(g *echo.Group) {
 	//API插入日志统一入口
-	g.POST("/o1", func(ctx echo.Context) error {
+	g.POST("/unifiedStdin", func(ctx echo.Context) error {
 		cs := &RequestType{}
-		fmt.Println("上下文", ctx.Request().Body )
 		body, err := ioutil.ReadAll(ctx.Request().Body)
 		if err != nil {
 			fmt.Println("读取HTTPbody失败", err)
 			return err
 		}
-		fmt.Println("token是多少", ctx.Request().Header)
-		tokenInfo := ctx.Request().Header
-		info, ok := tokenInfo["Authorization"]
-		if ok {
-			fmt.Println("token的值为", info)
-		}else {
-			fmt.Println("没有token")
-		}
-		fmt.Println("json", string(body))
 		json.Unmarshal(body, &cs)
 		level := cs.Level
 		switch level {
 			case "formal":
 				//fmt.Println("正常业务", ctx)
 				InsertAnylog(cs)
+				resInfo := &ResponsInfo{
+					Code: 200,
+					Msg:  "success",
+				}
+				return ctx.JSON(http.StatusOK, resInfo)
 			case "catch":
 				//fmt.Println("异常业务")
 				AbnormalLog(cs)
+				resInfo := &ResponsInfo{
+					Code: 200,
+					Msg:  "success",
+				}
+				return ctx.JSON(http.StatusOK, resInfo)
 			default:
 				//fmt.Println("默认正常业务")
 				InsertAnylog(cs)
+				resInfo := &ResponsInfo{
+					Code: 200,
+					Msg:  "success",
+				}
+				return ctx.JSON(http.StatusOK, resInfo)
 		}
-		return nil
 	})
 
 	/*
@@ -64,10 +72,6 @@ func RegisterRoutes(g *echo.Group) {
 
 //正常日志
 func InsertAnylog(r *RequestType)  {
-	//fmt.Println("正常日志level", r.Level)
-	//fmt.Println("正常日志table", r.Table)
-	//tableType := r.Table
-	//g.POST("/" + tableType + "/produce", )
 	httpLocal(r)
 }
 
@@ -80,10 +84,9 @@ func AbnormalLog(r *RequestType)  {
 /*
 在统一日志写入接口处转换调用本地的一个HTTP请求，换到不同的路由上
  */
-func httpLocal(r *RequestType)  {
+func httpLocal(r *RequestType) error {
 	url := "http://127.0.0.1:1323/v1/" + r.Table + "/produce"
 	infoJson, _ := json.Marshal(r)
-	//fmt.Println("二进制吗", infoJson)
 	stringJson := string(infoJson)
 	fmt.Println("字符串吗", stringJson)
 	req, _ := http.NewRequest("POST",url, strings.NewReader(stringJson))
@@ -95,15 +98,15 @@ func httpLocal(r *RequestType)  {
 	req.Header.Add("Content-Length", "84")
 	req.Header.Add("Connection", "keep-alive")
 	req.Header.Add("cache-control", "no-cache")
-	//req.Header.Add("Authorization", token)
 
 	resp,err :=http.DefaultClient.Do(req)
 	if err!=nil{
 		fmt.Printf("post数据请求error:%v\n",err)
+		return err
 	}else {
-		fmt.Println("post数据请求successful.")
 		respBody,_ :=ioutil.ReadAll(resp.Body)
-		fmt.Printf("response data:%v\n",string(respBody))
+		fmt.Printf("post数据请求successful:%v\n",string(respBody))
+		return nil
 	}
 
 }
