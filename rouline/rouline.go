@@ -30,7 +30,14 @@ func RegisterRoutes(g *echo.Group) {
 			fmt.Println("读取HTTPbody失败", err)
 			return err
 		}
-
+		fmt.Println("token是多少", ctx.Request().Header)
+		tokenInfo := ctx.Request().Header
+		info, ok := tokenInfo["Authorization"]
+		if ok {
+			fmt.Println("token的值为", info)
+		}else {
+			fmt.Println("没有token")
+		}
 		fmt.Println("json", string(body))
 		json.Unmarshal(body, &cs)
 		level := cs.Level
@@ -52,10 +59,11 @@ func RegisterRoutes(g *echo.Group) {
 	业务路由
 	 */
 	new(User).UserRegisterRoute(g)
+	new(Mechanism).MechanismRegisterRoute(g)
 }
 
 //正常日志
-func InsertAnylog(r *RequestType )  {
+func InsertAnylog(r *RequestType)  {
 	//fmt.Println("正常日志level", r.Level)
 	//fmt.Println("正常日志table", r.Table)
 	//tableType := r.Table
@@ -69,6 +77,9 @@ func AbnormalLog(r *RequestType)  {
 	fmt.Println("异常日志table", r.Table)
 }
 
+/*
+在统一日志写入接口处转换调用本地的一个HTTP请求，换到不同的路由上
+ */
 func httpLocal(r *RequestType)  {
 	url := "http://127.0.0.1:1323/v1/" + r.Table + "/produce"
 	infoJson, _ := json.Marshal(r)
@@ -84,6 +95,7 @@ func httpLocal(r *RequestType)  {
 	req.Header.Add("Content-Length", "84")
 	req.Header.Add("Connection", "keep-alive")
 	req.Header.Add("cache-control", "no-cache")
+	//req.Header.Add("Authorization", token)
 
 	resp,err :=http.DefaultClient.Do(req)
 	if err!=nil{

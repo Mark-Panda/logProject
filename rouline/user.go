@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/labstack/echo"
-	"github.com/labstack/echo/middleware"
 	"loggerProject/models"
 	"net/http"
 	"time"
@@ -18,13 +17,14 @@ func (user User) UserRegisterRoute(group *echo.Group) {
 	group.POST("/user/getToken", user.GetJwtToken)
 	group.POST("/user/produce", user.Produce)
 
-	group.Use(middleware.JWT([]byte("secret")))  //在验证token是需要在路由前设置和jwt一样的密钥
+	//group.Use(middleware.JWT([]byte("secret")))  //在验证token是需要在路由前设置和jwt一样的密钥
 	group.GET("/user/login", user.Login)
 
 }
 
 func (user User) Produce(ctx echo.Context) error {
-	fmt.Println("准备插入数据库", ctx.FormValue("name"))
+	fmt.Println("准备插入数据库", ctx.FormValue("table"))
+
 	return nil
 }
 
