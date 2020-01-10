@@ -8,7 +8,7 @@ type loginError struct {
 
 type Login struct {
 	gorm.Model
-	Phone string `gorm: "phone"`
+	Phone string `gorm:"phone"`
 	Password string `json:"password"`
 	Msg loginError `json:"msg"`
 }

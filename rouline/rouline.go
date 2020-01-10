@@ -1,17 +1,30 @@
 package rouline
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/labstack/echo"
 	"io/ioutil"
+	"net/http"
+	"strings"
 )
 
+//统一log入口，参数也要统一
+type RequestType struct {
+	Date string         //服务日志产生时间
+	Msg string          //日志内容
+	Name string
+	MechanismId int64  //机构ID
+	Level string       //日志等级
+	Table string       //业务表
+}
 
 
 func RegisterRoutes(g *echo.Group) {
-	//统一入口
+	//API插入日志统一入口
 	g.POST("/o1", func(ctx echo.Context) error {
-		fmt.Println("上下文", ctx )
+		cs := &RequestType{}
+		fmt.Println("上下文", ctx.Request().Body )
 		body, err := ioutil.ReadAll(ctx.Request().Body)
 		if err != nil {
 			fmt.Println("读取HTTPbody失败", err)
@@ -19,26 +32,66 @@ func RegisterRoutes(g *echo.Group) {
 		}
 
 		fmt.Println("json", string(body))
-		level := ctx.FormValue("level")
-
+		json.Unmarshal(body, &cs)
+		level := cs.Level
 		switch level {
 			case "formal":
-				fmt.Println("正常业务")
-				InsertAnylog(ctx)
+				//fmt.Println("正常业务", ctx)
+				InsertAnylog(cs)
 			case "catch":
-				fmt.Println("异常业务")
+				//fmt.Println("异常业务")
+				AbnormalLog(cs)
 			default:
-				fmt.Println("正常业务")
-
+				//fmt.Println("默认正常业务")
+				InsertAnylog(cs)
 		}
 		return nil
 	})
-	//new(LoginError).RegisterRoute(g)
+
+	/*
+	业务路由
+	 */
 	new(User).UserRegisterRoute(g)
 }
 
-func InsertAnylog(c echo.Context)  {
-	fmt.Println("comeoem")
-	table := c.FormValue("table") //表业务
-	fmt.Println("上下文", table)
+//正常日志
+func InsertAnylog(r *RequestType )  {
+	//fmt.Println("正常日志level", r.Level)
+	//fmt.Println("正常日志table", r.Table)
+	//tableType := r.Table
+	//g.POST("/" + tableType + "/produce", )
+	httpLocal(r)
+}
+
+//异常日志
+func AbnormalLog(r *RequestType)  {
+	fmt.Println("异常日志level", r.Level)
+	fmt.Println("异常日志table", r.Table)
+}
+
+func httpLocal(r *RequestType)  {
+	url := "http://127.0.0.1:1323/v1/" + r.Table + "/produce"
+	infoJson, _ := json.Marshal(r)
+	//fmt.Println("二进制吗", infoJson)
+	stringJson := string(infoJson)
+	fmt.Println("字符串吗", stringJson)
+	req, _ := http.NewRequest("POST",url, strings.NewReader(stringJson))
+	req.Header.Add("Content-Type", "application/json")
+	req.Header.Add("Accept", "*/*")
+	req.Header.Add("Cache-Control", "no-cache")
+	req.Header.Add("Host", "127.0.0.1:1323")
+	req.Header.Add("Accept-Encoding", "gzip, deflate")
+	req.Header.Add("Content-Length", "84")
+	req.Header.Add("Connection", "keep-alive")
+	req.Header.Add("cache-control", "no-cache")
+
+	resp,err :=http.DefaultClient.Do(req)
+	if err!=nil{
+		fmt.Printf("post数据请求error:%v\n",err)
+	}else {
+		fmt.Println("post数据请求successful.")
+		respBody,_ :=ioutil.ReadAll(resp.Body)
+		fmt.Printf("response data:%v\n",string(respBody))
+	}
+
 }

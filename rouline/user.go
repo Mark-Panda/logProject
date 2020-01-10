@@ -13,11 +13,19 @@ import (
 type User struct {}
 
 func (user User) UserRegisterRoute(group *echo.Group) {
-	group.GET("/use", user.ReadError)
-	group.GET("/add", user.WriteError)
-	group.POST("/getToken", user.GetJwtToken)
+	group.GET("/user/use", user.ReadError)
+	group.GET("/user/add", user.WriteError)
+	group.POST("/user/getToken", user.GetJwtToken)
+	group.POST("/user/produce", user.Produce)
+
 	group.Use(middleware.JWT([]byte("secret")))  //在验证token是需要在路由前设置和jwt一样的密钥
-	group.GET("/login", user.Login)
+	group.GET("/user/login", user.Login)
+
+}
+
+func (user User) Produce(ctx echo.Context) error {
+	fmt.Println("准备插入数据库", ctx.FormValue("name"))
+	return nil
 }
 
 func (user User) Login(ctx echo.Context) error  {
@@ -55,10 +63,6 @@ func (user User) WriteError(ctx echo.Context) error {
 
 func (user User) GetJwtToken(ctx echo.Context) error  {
 	fmt.Println("上下文", ctx)
-
-
-
-
 	name := ctx.FormValue("name")
 	pwd := ctx.FormValue("pwd")
 	fmt.Println("入参", name, pwd)
@@ -86,3 +90,5 @@ func (user User) GetJwtToken(ctx echo.Context) error  {
 	}
 	return echo.ErrUnauthorized
 }
+
+
